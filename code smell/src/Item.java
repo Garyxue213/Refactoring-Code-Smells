@@ -1,4 +1,4 @@
-class Item {
+public class Item {
     private String name;
     private double price;
     private int quantity;
@@ -38,5 +38,13 @@ class Item {
             return price - (discountAmount * price);
         else
             return price - discountAmount;
+    }
+
+    public double getCostWithTax() {
+        return getCost();
+    }
+
+    public boolean isGiftCard() {
+        return false;
     }
 }

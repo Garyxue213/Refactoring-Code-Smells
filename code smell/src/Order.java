@@ -12,26 +12,20 @@ public class Order {
     }
 
     public double calculateTotalPrice() {
-    	double total = getTotal();
-    	if (hasGiftCard()) {
-        	total -= 10.0; // subtract $10 for gift card
-    	}
-    	if (total > 100.0) {
-        	total *= 0.9; // apply 10% discount for orders over $100
-    	}
-    	return total;
+        double total = getTotal();
+        if (hasGiftCard()) {
+            total -= 10.0; // subtract $10 for gift card
+        }
+        if (total > 100.0) {
+            total *= 0.9; // apply 10% discount for orders over $100
+        }
+        return total;
     }
 
     public double getTotal() {
         double total = 0.0;
         for (Item item : items) {
-        	double price = item.getCost();
-        	total += price * item.getQuantity();
-       	    if (item instanceof TaxableItem) {
-                TaxableItem taxableItem = (TaxableItem) item;
-                double tax = taxableItem.getTaxRate() / 100.0 * item.getPrice();
-                total += tax;
-            }
+            total += item.getCostWithTax();
         }
         return total;
     }
@@ -43,12 +37,15 @@ public class Order {
             message += item.getName() + " - " + item.getPrice() + "\n";
         }
         message += "Total: " + calculateTotalPrice();
-        
-        System.out.println("Email to: " + customerEmail);
-        System.out.println("Subject: " + "Order Confirmation");
-        System.out.println("Body: " + message);
+
+        sendEmail(customerEmail, "Order Confirmation", message);
     }
 
+    private void sendEmail(String customerEmail, String subject, String message) {
+        System.out.println("Email to: " + customerEmail);
+        System.out.println("Subject: " + subject);
+        System.out.println("Body: " + message);
+    }
 
     public void addItem(Item item) {
         items.add(item);
@@ -83,28 +80,17 @@ public class Order {
     }
 
     public boolean hasGiftCard() {
-        boolean has_gift_card = false;
-        for (Item item : items) {
-            if (item instanceof GiftCardItem) {
-                has_gift_card = true;
-                break;
-            }
-        }
-        return has_gift_card;
+        return items.stream().anyMatch(Item::isGiftCard);
     }
 
-   public void printOrder() {
+    public void printOrder() {
         System.out.println("Order Details:");
         for (Item item : items) {
             System.out.println(item.getName() + " - " + item.getPrice());
         }
-   }
+    }
 
-   public void addItemsFromAnotherOrder(Order otherOrder) {
-        for (Item item : otherOrder.getItems()) {
-            items.add(item);
-        }
-   }
-
+    public void addItemsFromAnotherOrder(Order otherOrder) {
+        items.addAll(otherOrder.getItems());
+    }
 }
-
